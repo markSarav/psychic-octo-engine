@@ -5,6 +5,9 @@ from settings import Settings
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
+from stars import StarBackground
+
+from random import randint
 
 class AlienInvasion:
     """Overall class to manage game assets and behavior."""
@@ -23,9 +26,11 @@ class AlienInvasion:
 
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
+        self.stars = pygame.sprite.Group()
 
         self.ship = Ship(self)
         self._create_fleet()
+        self._create_star_background()
 
     def run_game(self):
         """Start the main loop for the game."""
@@ -97,6 +102,32 @@ class AlienInvasion:
             current_y += 2 * alien_height
 
         self.aliens.add(alien)
+    
+    def _create_star_background(self):
+        # create a star that is not in the group
+        star = StarBackground(self)
+        # get the width and height of star for spacing
+        star_width, star_height = star.rect.size
+        # create a current working position (x, y) based off width and 
+        # height of the star
+        current_x = star_width
+        current_y = star_height
+        # print a star at the position (current_x, and current_y)
+        while current_y < (self.settings.screen_height - star_height):
+            while current_x < (self.settings.screen_width - star_width):
+                self._create_star(current_x, current_y)
+                current_x += randint(star_width, star_width*star_width)
+            current_x = randint(star_width, star_width*star_width)
+            current_y += star_height
+        
+    def _create_star(self, x_position, y_position):
+        # create star
+        new_star = StarBackground(self)
+        # move to target x and y pos
+        new_star.rect.x = x_position
+        new_star.rect.y = y_position
+        # add star to sprite group
+        self.stars.add(new_star)
 
     def _create_alien(self, x_position, y_position):
         """Create an alien and place it in the row."""
@@ -109,10 +140,11 @@ class AlienInvasion:
     def _update_screen(self):
         """Update images on the screen, and flip to the new screen."""
         self.screen.fill(self.settings.bg_color)
+        self.stars.draw(self.screen)
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
-        self.ship.blitme()
         self.aliens.draw(self.screen)
+        self.ship.blitme()
         pygame.display.flip()
 
 if __name__ == '__main__':
