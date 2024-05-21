@@ -11,7 +11,7 @@ from random import randint
 
 class AlienInvasion:
     """Overall class to manage game assets and behavior."""
-
+    
     def __init__(self) -> None:
         """Initialize the game, and create game resources."""
         pygame.init()
@@ -38,8 +38,15 @@ class AlienInvasion:
             self._check_events()
             self.ship.update()
             self._update_bullets()
+            self._update_aliens()
             self._update_screen()
             self.clock.tick(60)
+    
+    def _change_fleet_direction(self):
+        """Drop the entire fleet and change the fleet's direction."""
+        for alien in self.aliens.sprites():
+            alien.rect.y += self.settings.fleet_drop_speed
+        self.settings.fleet_direction *= -1
     
     def _check_events(self):
         """Responds to keypresses and mouse events."""
@@ -51,6 +58,13 @@ class AlienInvasion:
             elif event.type == pygame.KEYUP:
                 self._check_keyup_events(event)
     
+    def _check_fleet_edges(self):
+        """Respond appropriately if any aliens have reached an edge."""
+        for alien in self.aliens.sprites():
+            if alien.check_edges():
+                self._change_fleet_direction()
+                break
+
     def _check_keydown_events(self, event):
         """Respond to key presses."""
         if event.key == pygame.K_d:
@@ -68,21 +82,14 @@ class AlienInvasion:
             self.ship.moving_right = False
         elif event.key == pygame.K_a:
             self.ship.moving_left = False
-    
-    def _fire_bullet(self):
-        """Create a new bullet and add it to the bullets group."""
-        if len(self.bullets) < self.settings.bullets_allowed:
-            new_bullet = Bullet(self)
-            self.bullets.add(new_bullet)
 
-    def _update_bullets(self):
-        """Update position of bullets and get rid of old bullets."""
-        # Update bullet positions
-        self.bullets.update()
-        # Get rid of bullets that have disappeared.
-        for bullet in self.bullets.copy():
-            if bullet.rect.bottom <= 0:
-                self.bullets.remove(bullet)
+    def _create_alien(self, x_position, y_position):
+        """Create an alien and place it in the row."""
+        new_alien = Alien(self)
+        new_alien.x = x_position
+        new_alien.rect.x = x_position
+        new_alien.rect.y = y_position
+        self.aliens.add(new_alien)
 
     def _create_fleet(self):
         """Create the fleet of aliens."""
@@ -101,9 +108,18 @@ class AlienInvasion:
             current_x = alien_width
             current_y += 2 * alien_height
 
-        self.aliens.add(alien)
+    def _create_star(self, x_position, y_position):
+        """Creates a Star sprite used for the background."""
+        # create star
+        new_star = StarBackground(self)
+        # move to target x and y pos
+        new_star.rect.x = x_position
+        new_star.rect.y = y_position
+        # add star to sprite group
+        self.stars.add(new_star)
     
     def _create_star_background(self):
+        """Creates a grid of random stars to use as a background."""
         # create a star that is not in the group
         star = StarBackground(self)
         # get the width and height of star for spacing
@@ -120,22 +136,25 @@ class AlienInvasion:
             current_x = randint(star_width, star_width*star_width)
             current_y += star_height
         
-    def _create_star(self, x_position, y_position):
-        # create star
-        new_star = StarBackground(self)
-        # move to target x and y pos
-        new_star.rect.x = x_position
-        new_star.rect.y = y_position
-        # add star to sprite group
-        self.stars.add(new_star)
+    def _fire_bullet(self):
+        """Create a new bullet and add it to the bullets group."""
+        if len(self.bullets) < self.settings.bullets_allowed:
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
 
-    def _create_alien(self, x_position, y_position):
-        """Create an alien and place it in the row."""
-        new_alien = Alien(self)
-        new_alien.x = x_position
-        new_alien.rect.x = x_position
-        new_alien.rect.y = y_position
-        self.aliens.add(new_alien)
+    def _update_aliens(self):
+        """Update the positions of all aliens in the fleet."""
+        self._check_fleet_edges()
+        self.aliens.update()
+
+    def _update_bullets(self):
+        """Update position of bullets and get rid of old bullets."""
+        # Update bullet positions
+        self.bullets.update()
+        # Get rid of bullets that have disappeared.
+        for bullet in self.bullets.copy():
+            if bullet.rect.bottom <= 0:
+                self.bullets.remove(bullet)
 
     def _update_screen(self):
         """Update images on the screen, and flip to the new screen."""
