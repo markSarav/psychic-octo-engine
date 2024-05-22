@@ -4,7 +4,7 @@ class Settings:
     def __init__(self) -> None:
         """Initialize the game's settings."""
         # Alien settings
-        self.alien_speed = 1.0
+        self.alien_speed = 1
         self.fleet_direction = 1
         self.fleet_drop_speed = 10
 

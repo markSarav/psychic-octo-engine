@@ -3,6 +3,7 @@ import pygame
 
 from alien import Alien
 from bullet import Bullet
+from button import Button
 from game_stats import GameStats
 from settings import Settings
 from ship import Ship
@@ -20,12 +21,18 @@ class AlienInvasion:
         pygame.display.set_caption("Alien Invasion")
         # self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.settings = Settings()
-        self.game_active = True
+
+        # Start Alien Invasion in an inactice state.
+        self.game_active = False
 
         self.screen = pygame.display.set_mode(
             (self.settings.screen_width, self.settings.screen_height)
         )
 
+        # Make the Play button.
+        self.play_button = Button(self, "'E' to Play!")
+
+        
         self.clock = pygame.time.Clock()
 
         self.aliens = pygame.sprite.Group()
@@ -39,11 +46,14 @@ class AlienInvasion:
 
     def run_game(self):
         """Start the main loop for the game."""
-        while self.game_active:
+        while True:
             self._check_events()
-            self.ship.update()
-            self._update_bullets()
-            self._update_aliens()
+
+            if self.game_active:
+                self.ship.update()
+                self._update_bullets()
+                self._update_aliens()
+            
             self._update_screen()
             self.clock.tick(60)
     
@@ -98,6 +108,8 @@ class AlienInvasion:
             self.ship.moving_left = True
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
+        elif event.key == pygame.K_e:
+            self._start_game()
         elif event.key == pygame.K_q:
             sys.exit()
 
@@ -107,7 +119,7 @@ class AlienInvasion:
             self.ship.moving_right = False
         elif event.key == pygame.K_a:
             self.ship.moving_left = False
-
+        
     def _create_alien(self, x_position, y_position):
         """Create an alien and place it in the row."""
         new_alien = Alien(self)
@@ -163,7 +175,8 @@ class AlienInvasion:
         
     def _fire_bullet(self):
         """Create a new bullet and add it to the bullets group."""
-        if len(self.bullets) < self.settings.bullets_allowed:
+        if len(self.bullets) < (self.settings.bullets_allowed
+                                and self.game_active):
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
 
@@ -182,6 +195,16 @@ class AlienInvasion:
             sleep(0.5)
         else:
             self.game_active = False
+    
+    def _start_game(self):
+        """Respond to when user presses 'e' to start game."""
+        if not self.game_active:
+            self.stats.reset_stats()
+            self.bullets.empty()
+            self.aliens.empty()
+            self._create_fleet()
+            self.ship.center_ship()
+            self.game_active = True
 
     def _update_aliens(self):
         """Update the positions of all aliens in the fleet."""
@@ -213,7 +236,14 @@ class AlienInvasion:
             bullet.draw_bullet()
         self.aliens.draw(self.screen)
         self.ship.blitme()
+
+        # Draw the play button if the game is inactive.
+        if not self.game_active:
+            self.play_button.draw_button()
+
         pygame.display.flip()
+
+
 
 if __name__ == '__main__':
     # Make a game instance, and run the game.
