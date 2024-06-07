@@ -18,10 +18,16 @@ class Settings:
         # How quickly the game speeds up
         self.speedup_scale = 1.1
 
+        # Scaling of score as rounds continue
+        self.score_scale = 1.5
+
         # Screen settings
         self.bg_color = (0, 0, 0)
         self.screen_height = 800
         self.screen_width = 1024
+
+        # Scoring settings
+        self.alien_points = 50
 
         # Ship settings
         self.ship_limit = 3
@@ -33,7 +39,7 @@ class Settings:
         """Initialize setings that change throughout the game."""
         self.ship_speed = 1.5
         self.bullet_speed = 10.0
-        self.alien_speed = 1.0
+        self.alien_speed = 1
         # fleet_direction of 1 represents right; -1 represents left.
         self.fleet_direction = 1
 
@@ -42,3 +48,6 @@ class Settings:
         self.ship_speed *= self.speedup_scale
         self.bullet_speed *= self.speedup_scale
         self.alien_speed *= self.speedup_scale
+
+        self.alien_points = int(self.alien_points * self.score_scale)
+        print(self.alien_points)
