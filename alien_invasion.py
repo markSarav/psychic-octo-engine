@@ -58,12 +58,12 @@ class AlienInvasion:
         """Start the main loop for the game."""
         while True:
             self._check_events()
-
             if self.game_active:
                 self.ship.update()
                 self._update_bullets()
                 self._update_aliens()
-
+            else:
+                self.sb.check_high_score()
             self._update_screen()
             self.clock.tick(60)
 
@@ -89,7 +89,6 @@ class AlienInvasion:
             for aliens in collisions.values():
                 self.stats.score += self.settings.alien_points * len(aliens)
             self.sb.prep_score()
-            self.sb.check_high_score()
         if not self.aliens:
             self.bullets.empty()
             self._create_fleet()

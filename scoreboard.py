@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import pygame.font
 from pygame.sprite import Group
 
@@ -27,9 +30,12 @@ class Scoreboard:
 
     def check_high_score(self):
         """Check to see if there's a new high score."""
-        if self.stats.score > self.stats.high_score:
+        if self.stats.check_highscore_beaten():
             self.stats.high_score = self.stats.score
             self.prep_high_score()
+            path = Path("highscore.json")
+            contents = json.dumps(self.stats.high_score)
+            path.write_text(contents)
 
     def prep_high_score(self):
         """Turn the high score into a rendered image."""
