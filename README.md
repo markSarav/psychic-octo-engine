@@ -28,9 +28,10 @@ To start a new game you may press the 'e' key to start a new game.
 
 TODO:
 
-Implement a scoring system.
-Display the number of lives available to player.
-Keep track of past highscores.
-Display past highscores at end of game.
-Increased difficulty with round progression.
+(Done)Implement a scoring system.
+(Done)Display the number of lives available to player.
+(Done)Keep track of past highscores.
+(Done)Display past highscores at end of game.
+(Done)Increased difficulty with round progression.
 Power ups that can spawn randomly.
+Refactor.
